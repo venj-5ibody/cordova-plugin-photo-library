@@ -110,7 +110,7 @@ final class PhotoLibraryService {
 
             // requestImageData call is async
             PHImageManager.default().requestImageData(for: asset, options: self.thumbnailRequestOptions) {
-                (imageData: Data?, dataUTI: String?, orientation: UIImageOrientation, info: [AnyHashable: Any]?) in
+                (imageData: Data?, dataUTI: String?, orientation: UIImage.Orientation, info: [AnyHashable: Any]?) in
 
                 let imageURL = info?["PHImageFileURLKey"] as? URL
 
@@ -189,7 +189,7 @@ final class PhotoLibraryService {
             let asset = obj as! PHAsset
 
             PHImageManager.default().requestImageData(for: asset, options: self.imageRequestOptions) {
-                (imageData: Data?, dataUTI: String?, orientation: UIImageOrientation, info: [AnyHashable: Any]?) in
+                (imageData: Data?, dataUTI: String?, orientation: UIImage.Orientation, info: [AnyHashable: Any]?) in
 
                 guard let image = imageData != nil ? UIImage(data: imageData!) : nil else {
                     completion(nil)
@@ -236,7 +236,7 @@ final class PhotoLibraryService {
         }
 
         // Permission was manually denied by user, open settings screen
-        let settingsUrl = URL(string: UIApplicationOpenSettingsURLString)
+        let settingsUrl = URL(string: UIApplication.openSettingsURLString)
         if let url = settingsUrl {
             UIApplication.shared.openURL(url)
             // TODO: run callback only when return ?
@@ -394,7 +394,7 @@ final class PhotoLibraryService {
             guard let match = self.dataURLPattern.firstMatch(in: url, options: NSRegularExpression.MatchingOptions(rawValue: 0), range: NSMakeRange(0, url.characters.count)) else { // TODO: firstMatchInString seems to be slow for unknown reason
                 throw PhotoLibraryError.error(description: "The dataURL could not be parsed")
             }
-            let dataPos = match.rangeAt(0).length
+            let dataPos = match.range(at: 0).length
             let base64 = (url as NSString).substring(from: dataPos)
             guard let decoded = Data(base64Encoded: base64, options: NSData.Base64DecodingOptions(rawValue: 0)) else {
                 throw PhotoLibraryError.error(description: "The dataURL could not be decoded")
@@ -453,10 +453,10 @@ final class PhotoLibraryService {
         var mimeType: String?
 
         if (imageHasAlpha(image)){
-            data = UIImagePNGRepresentation(image)
+            data = image.pngData()
             mimeType = data != nil ? "image/png" : nil
         } else {
-            data = UIImageJPEGRepresentation(image, CGFloat(quality))
+            data = image.jpegData(compressionQuality: CGFloat(quality)) //UIImageJPEGRepresentation(image, CGFloat(quality))
             mimeType = data != nil ? "image/jpeg" : nil
         }
 
